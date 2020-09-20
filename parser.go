@@ -28,6 +28,17 @@ type GcodeLine struct {
 	Comment       *string
 }
 
+func (g *GcodeLine) IsCmd(cmdLetter uint8, cmdNumber uint16) bool {
+	return g.CmdLetter == cmdLetter && g.CmdNumber == cmdNumber
+}
+
+func (g *GcodeLine) IsG(cmdNumber uint16) bool {
+	return g.CmdLetter == G && g.CmdNumber == cmdNumber
+}
+func (g *GcodeLine) IsM(cmdNumber uint16) bool {
+	return g.CmdLetter == M && g.CmdNumber == cmdNumber
+}
+
 func (g GcodeLine) String() string {
 	var buf bytes.Buffer
 	//if g.Comment != nil {
@@ -90,8 +101,12 @@ func (g *GcodeLine) Empty() bool {
 
 func ParseLine(str string) (line GcodeLine, err error) {
 	i := 0
-	for isSpace(str[i]) {
+	for i < len(str) && isSpace(str[i]) {
 		i++
+	}
+	if i == len(str) {
+		// the line contains only whitespace
+		return
 	}
 	if str[i] == CommentChar {
 		comment := str[i:]
@@ -161,6 +176,14 @@ func ParseLine(str string) (line GcodeLine, err error) {
 		}
 	}
 	return
+}
+
+func mustParseLine(str string) *GcodeLine {
+	line, err := ParseLine(str)
+	if err != nil {
+		panic(err)
+	}
+	return &line
 }
 
 func isSpace(c uint8) bool {

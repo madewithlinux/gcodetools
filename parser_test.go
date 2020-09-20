@@ -7,6 +7,16 @@ import (
 	"testing"
 )
 
+func TestGcodeLine_Empty(t *testing.T) {
+	assert.True(t, (&GcodeLine{}).Empty())
+	assert.False(t, (&GcodeLine{CmdLetter: G}).Empty())
+	assert.False(t, (&GcodeLine{CmdNumber: 1}).Empty())
+	assert.False(t, (&GcodeLine{Xvalid: true}).Empty())
+	assert.False(t, (&GcodeLine{Yvalid: true}).Empty())
+	assert.False(t, (&GcodeLine{Zvalid: true}).Empty())
+	assert.False(t, (&GcodeLine{Evalid: true}).Empty())
+}
+
 type toStringTestPair struct {
 	gcode GcodeLine
 	str   string
@@ -36,6 +46,7 @@ func TestGcodeLine_String(t *testing.T) {
 }
 
 func TestParseLine(t *testing.T) {
+	testParsesAs(t, ``, GcodeLine{})
 	testParsesAs(t, `G0 X1 Y2 Z3 E4`, GcodeLine{CmdLetter: 'G', X: 1, Y: 2, Z: 3, E: 4, Xvalid: true, Yvalid: true, Zvalid: true, Evalid: true})
 	testParsesAs(t, ` G0 X.21 Y20 Z3`, GcodeLine{CmdLetter: 'G', CmdNumber: 0, X: 0.21, Xvalid: true, Y: 20, Yvalid: true, Z: 3, Zvalid: true})
 	testParsesAs(t, `	G1 Z0.31 X1 Y2`, GcodeLine{CmdLetter: 'G', CmdNumber: 1, X: 1, Xvalid: true, Y: 2, Yvalid: true, Z: 0.31, Zvalid: true})
