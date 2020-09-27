@@ -14,6 +14,7 @@ type GcodeMinifierConfig struct {
 	Threshold                        float64
 	thresholdSqr                     float64
 	XYDecimals, ZDecimals, EDecimals int
+	AllowUnknownGcode                bool
 	////
 }
 
@@ -88,7 +89,7 @@ func (cfg *GcodeMinifierConfig) MinifyGcodeLineInPlace(state *MachineState, line
 		line.StringParams = nil
 	}
 
-	if line.Empty() {
+	if line.CommentOnly() || line.Empty() {
 		return
 	}
 
@@ -122,17 +123,19 @@ func (cfg *GcodeMinifierConfig) MinifyGcodeLineInPlace(state *MachineState, line
 		// TODO
 	}
 
-	panic("unimplemented: " + line.String()) // TODO
+	if !cfg.AllowUnknownGcode {
+		panic("unimplemented: " + line.String())
+	}
 }
 
 // move must be G0 or G1
 func (cfg *GcodeMinifierConfig) minifyAbsoluteG0G1Move(state *MachineState, line *GcodeLine) {
 	if !state.IsHomed || state.RelativeCoordinates {
-		panic("unimplemented")
+		panic("error: relative moves are unimplemented")
 	}
 
 	if line.NumericParams != nil || line.StringParams != nil {
-		panic("unimplemented") // TODO handle extra parameters on G0/G1 (or maybe just pass them through unchanged?)
+		panic("error: extra G0/G1 parameters are unimplemented") // TODO handle extra parameters on G0/G1 (or maybe just pass them through unchanged?)
 	}
 	if line.Xvalid && !cfg.float64ApproxEq(line.X, state.X) {
 		state.X = line.X

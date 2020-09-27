@@ -13,3 +13,13 @@ ci:
     diff -u <(echo -n) <(gofmt -d .)
     go vet ./...
     go test -v -race ./...
+    just build
+
+build:
+    gox \
+        -os="linux" \
+        -arch="amd64" \
+        -output='gcodetools.{{"{{"}}.OS}}' \
+        -ldflags "-X main.Rev=`git rev-parse HEAD` -X main.Version=`git describe --tags`" \
+        -verbose \
+        ./...

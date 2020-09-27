@@ -84,6 +84,19 @@ func (g GcodeLine) String() string {
 	return buf.String()
 }
 
+func (g *GcodeLine) CommentOnly() bool {
+	return g.CmdLetter == 0 &&
+		g.CmdNumber == 0 &&
+		!g.Xvalid &&
+		!g.Yvalid &&
+		!g.Zvalid &&
+		!g.Evalid &&
+		g.Feedrate == 0 &&
+		(g.NumericParams == nil || len(g.NumericParams) == 0) &&
+		(g.StringParams == nil || len(g.StringParams) == 0) &&
+		(g.Comment != nil && len(*g.Comment) > 0)
+}
+
 func (g *GcodeLine) Empty() bool {
 	return g.CmdLetter == 0 &&
 		g.CmdNumber == 0 &&

@@ -3,6 +3,9 @@ language: go
 go:
   - 1.x
 
+before_install:
+  - go get github.com/mitchellh/gox
+
 install:
   - # skip
 
@@ -11,3 +14,17 @@ script:
   - diff -u <(echo -n) <(gofmt -d .)
   - go vet ./...
   - go test -v -race ./...
+  - gox -os="linux darwin windows" -arch="amd64" -output="gcodetools.{{.OS}}" -ldflags "-X main.Rev=`git rev-parse HEAD` -X main.Version=`git describe --tags`" -verbose ./...
+
+deploy:
+  provider: releases
+  api-key:
+    secure: e2jg7kiUbeXrew3rM7JbRDeuJqfcxvuTmxdiU/Li+ummdQYryIcOb6Oc/yORfexDYtflI0gQFfftcmIRV60VPORQ2htGVwBWZs7krE0v9/FBKtqyUO60Sh7V6ab79RtWpwXw66D1D1AXvAbpIGdc7sjeqder/2r2dCINwitaUgZJDOun2BuJErj2eAb8IkHqEl4yrOh/IX853+EIAyTtp/4tEvIF/rAFbtD5o0uy0QOxhJ2BaWne5fnCOmHfdcylWj+0k9nLEet5r4koMyWjoawMowwhnEjO3ZvMtpOW4UqCmXetz/vaQ5cJz+C/xFtKd3tCuBxydyzNChJsq0+LhEMz/nW8MrG8+vsRmdXqAZu9DO2TVFlzietbkTcnD1N8c+cjzwSxgLwhzSxtOaNxeOOAXkA3q67o8PdwQl5mCJC6uclch2UplgLJO8fQD/cW8DHP3rW9U3aHeHdxKn1XUg9UK2LheP7UbQQ0hdmOZ/zeYG1z8u0YlKdgISAGZjbdle/zPC8Kcqa1ErLcfXTJsVC6e4vuXGsnqgt2lDGnSaJaxlc/FyP/UJNTLqYi2wB6hCjoWn/GzziupHE/6AmF3dQDBQC3NnOt1/yxZOQAWVNj3aOsPPQ0BYh2yfFM9OkJxLE4epa7KyT6gdNgZDPKan4Sr0Xn1keU1cdW2srrFz4=
+  file:
+    - gcodetools.darwin
+    - gcodetools.linux
+    - gcodetools.windows.exe
+  skip_cleanup: true
+  on:
+    tags: true
+
